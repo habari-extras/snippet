@@ -1,6 +1,30 @@
 <?php
 class Snippet extends Plugin {
   
+  function langSelect() {
+   
+   $output = array(
+    'actionscript'=>'Actionscript',
+    'bash'=>'Bash',
+    'c'=>'C',
+    'csharp'=>'C#',
+    'cpp'=>'C++',
+    'cobol'=>'COBOL',
+    'coldfusion'=>'ColdFusion',
+    'css'=>'CSS',
+    'd'=>'D',
+    'html'=>'HTML',
+    'java'=>'Java',
+    'javascript'=>'Javascript',
+    'php'=>'PHP',
+    'python'=>'Python'
+   );
+   
+   return $output; 
+    
+  }
+  
+  
   function info() {
 		return array(
 			'name' => 'Snippet',
@@ -13,10 +37,22 @@ class Snippet extends Plugin {
 		);
 	}
 	
+	function action_plugin_activation( $plugin_file )
+	{
+		if( Plugins::id_from_file(__FILE__) == Plugins::id_from_file($plugin_file) ) {
+			Post::add_new_type('snippet');
+		}
+	}
+	
+	public function action_plugin_deactivation( $file )
+  {
+    if ( realpath( $file ) == __FILE__ ) {
+      Post::deactivate_post_type('snippet');
+    }
+  }
+	
 	public function action_init() {		
 		$this->add_template('snippet.single', dirname(__FILE__) . '/snippet.single.php');
-		
-		Post::add_new_type('snippet');
 	}
   
   public function action_add_template_vars($theme, $vars) {
@@ -30,7 +66,7 @@ class Snippet extends Plugin {
 		$rules[] = new RewriteRule(array(
 			'name' => 'show_snippet',
 			'parse_regex' => '%snippet/(?P<slug>.*)[\/]?$%i',
-			'build_str' =>  'snipet/{$slug}',
+			'build_str' =>  'snippet/{$slug}',
 			'handler' => 'UserThemeHandler',
 			'action' => 'show_snippet',
 			'priority' => 6,
@@ -49,13 +85,32 @@ class Snippet extends Plugin {
 		exit;
 	}
 	
+		/**
+	* Add fields to the publish page for podcasts
+	*
+	* @param FormUI $form The publish form
+	* @param Post $post 
+	* @return array 
+	*/
+	public function action_form_publish( $form, $post )
+	{
+		if( $form->content_type->value == Post::type( 'snippet' ) ) {
+			$postfields = $form->publish_controls->append( 'fieldset', 'language', _t( 'Language') );
+			
+			$snippet_language = $postfields->append( 'select', 'snippet_language', 'null:null', _t('Language') );
+			$snippet_language->options = $this->langSelect();
+			$snippet_language->value = strlen( $post->info->snippet_language ) ? $post->info->snippet_language : '' ;
+			$snippet_language->template = 'tabcontrol_select';
+		}
+	}
+	
 	public function get($slug) {
 		$post = Post::get(array('slug' => $slug));
 		
 		
-		if($post->content_type == Post::type('event')) {
+		if($post->content_type == Post::type('snippet')) {
 			$return = $post;
-			$return->language = $post->language;
+			$return->snippet_language = $post->snippet_language;
       
 			return $return;
 		} else {
@@ -73,17 +128,15 @@ class Snippet extends Plugin {
 	}
 	
 	public function html($snippet) { ?>
-	  <div id="snippet" class="snippet"
-		<div id="hcalendar-<?php echo $event->slug; ?>" class="vevent">
-			<a href="<?php echo $event->permalink; ?>" class="url">
-				<?php if(strlen($event->info->start) > 0) { ?><abbr title="<?php echo date("Ymd\THiO", $event->info->start); ?>" class="dtstart"><?php echo date("F jS, Y g:ia", $post->info->start); ?></abbr>, <?php } ?>
-				<?php if(strlen($event->info->end) > 0) { ?><abbr title="<?php echo date("Ymd\THiO", $event->info->end); ?>" class="dtend"><?php echo date("F jS, Y g:ia", $post->info->end); ?></abbr><?php } ?>
-				<span class="summary"><?php echo $event->title; ?></span>
-				<?php if(strlen($event->info->location) > 0) { ?>– at <span class="location"><?php echo $event->info->location; ?></span><?php } ?>
-			</a>
-			<div class="description"><?php echo $event->content_out; ?></div>
-			<div class="tags">Tags: <?php echo $event->tags_out; ?></div>
-		</div>
+	  <div class="snippet">
+	    <h2><?php echo $snippet->title?></h2>
+	    <div class="output">
+	      
+	    </div>
+	    <p>
+	      Language: <?php echo $snippet->snippet_language; ?>
+	    </p>
+	  </div>
 	<?php }
 	
 	public function filter_publish_controls ($controls, $post) {

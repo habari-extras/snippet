@@ -43,7 +43,7 @@ if ( $user ) { ?>
 <!-- entry.single -->
 	<div class="single">
 		<div id="primary">
-			<?php echo $event_out; ?>
+			<?php echo $snippet_out; ?>
 		</div>
 	</div>
 <!-- /entry.single -->
