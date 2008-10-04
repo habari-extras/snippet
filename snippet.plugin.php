@@ -72,7 +72,8 @@ class Snippet extends Plugin {
 		}
 	}
 	
-	public function html($event) { ?>
+	public function html($snippet) { ?>
+	  <div id="snippet" class="snippet"
 		<div id="hcalendar-<?php echo $event->slug; ?>" class="vevent">
 			<a href="<?php echo $event->permalink; ?>" class="url">
 				<?php if(strlen($event->info->start) > 0) { ?><abbr title="<?php echo date("Ymd\THiO", $event->info->start); ?>" class="dtstart"><?php echo date("F jS, Y g:ia", $post->info->start); ?></abbr>, <?php } ?>
@@ -91,18 +92,11 @@ class Snippet extends Plugin {
 		if($vars['content_type'] == Post::type('snippet')) {
 			$output = '';
 			
-			$output .= '<div class="text container"><p class="column span-5"><label for="event_start">Starts:</label></p><p class="column span-14 last"><input type="text" id="event_start" name="event_start" value="';
-			if(strlen($post->info->event_start) > 0) {
-				$output .= date('Y-m-d H:i:s', $post->info->event_start);
+			$output .= '<div class="text container"><p class="column span-5"><label for="snippet_language">Language:</label></p><p class="column span-14 last"><input type="text" id="snippet_language" name="snippet_language" value="';
+			if(strlen($post->info->snippet_language) > 0) {
+				$output .= $post->info->snippet_language;
 			}
-			$output .= '" /></p></div>';
-			$output .= '<div class="text container"><p class="column span-5"><label for="event_end">Ends: <small>Optional</small></label></p><p class="column span-14 last"><input type="text" id="event_end" name="event_end" value="';
-			if(strlen($post->info->event_end) > 0) {
-				$output .= date('Y-m-d H:i:s', $post->info->event_end);
-			}
-			$output .= '" /></p></div>';
-			$output .= '<div class="text container"><p class="column span-5"><label for="event_location">Location:</label></p><p class="column span-14 last"><input type="text" id="event_location" name="event_location" value="' . $post->info->event_location . '" /></p></div>';
-			
+			$output .= '" /></p></div>';		
 			$controls['Details'] = $output;
 		}
 		
@@ -120,19 +114,8 @@ class Snippet extends Plugin {
 	function set($post) {
 		$vars = Controller::get_handler_vars();
 		
-		if((strlen($vars['event_start']) > 0) && (strlen($vars['event_end']) > 0)) {
-			$post->info->event_start = strtotime($vars['event_start']);
-			$post->info->event_end = strtotime($vars['event_end']);
-		} elseif((strlen($vars['event_start']) > 0)) {
-			$post->info->event_start = strtotime($vars['event_start']);
-			$post->info->event_end = '';
-		} elseif((strlen($vars['event_end']) > 0)) {
-			$post->info->event_start = strtotime(date('Y-m-d', strtotime($vars['event_end'])));
-			$post->info->event_end = $post->info->event_start + (60*60*24);
-		}
-		
-		if(strlen($vars['event_location']) > 0) {
-			$post->info->event_location = $vars['event_location'];
+		if(strlen($vars['snippet_language']) > 0) {
+			$post->info->event_location = $vars['snippet_language'];
 		}
 		
 	}
