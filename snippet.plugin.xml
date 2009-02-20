@@ -1,0 +1,10 @@
+<plugin>
+	<name>Snippet</name>
+	<version>1.0</version>
+	<url>http://digitalspaghetti.me.uk/</url>
+	<author>Tane Piper</author>
+	<authorurl>http://digitalspaghetti.me.uk</authorurl>
+	<license>Apache Licence 2.0</license>
+	<description>A plugin to share code snippets.</description>
+</plugin>
+
